@@ -15,7 +15,7 @@ const taskCategories = [
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { subscription, isActive } = useSubscription();
+  const { isActive } = useSubscription();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -44,29 +44,32 @@ export default function Dashboard() {
   });
 
   const totalTasks = tasks?.length || 0;
-  const completedTasks = completions?.filter(c => c.status === "approved").length || 0;
+  const completedCount = completions?.filter(c => c.status === "approved").length || 0;
   const totalEarned = completions?.filter(c => c.status === "approved").reduce((sum, c) => sum + (c.earned_amount || 0), 0) || 0;
-  const availableTasks = totalTasks - (completions?.length || 0);
+  const myTaskIds = new Set(completions?.map(c => c.task_id) || []);
+  const availableTasks = totalTasks - myTaskIds.size;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
   const stats = [
-    { label: "Available Tasks", value: availableTasks > 0 ? availableTasks : totalTasks, sub: `${totalTasks} total`, icon: TrendingUp },
-    { label: "Total Earned", value: `KES ${totalEarned}`, sub: `${completedTasks} tasks paid`, icon: DollarSign },
-    { label: "Completed", value: completedTasks, sub: "Keep it up!", icon: CheckCircle },
+    { label: "Available Tasks", value: availableTasks, sub: `${totalTasks} total`, icon: TrendingUp },
+    { label: "Total Earned", value: `KES ${totalEarned}`, sub: `${completedCount} tasks paid`, icon: DollarSign },
+    { label: "Completed", value: completedCount, sub: completedCount > 0 ? "Keep it up!" : "Start a task", icon: CheckCircle },
     { label: "Tasks Available", value: totalTasks, sub: "New tasks added daily", icon: Clock },
   ];
 
   return (
     <div style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-      {/* Welcome */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold">
           Welcome back, <span className="text-primary">{firstName}</span>
         </h1>
-        <p className="text-muted-foreground">You have {availableTasks > 0 ? availableTasks : totalTasks} tasks available. Let's get to work.</p>
+        <p className="text-muted-foreground">
+          {availableTasks > 0
+            ? `You have ${availableTasks} tasks available. Let's get to work.`
+            : "No tasks available right now. Check back soon!"}
+        </p>
       </div>
 
-      {/* Stats Grid */}
       <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-xl border border-border bg-card p-5">
@@ -80,20 +83,14 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Subscription CTA */}
       {!isActive && (
         <div className="mb-10 rounded-xl border border-primary/30 bg-primary/5 p-6">
           <h3 className="mb-2 text-lg font-semibold">Unlock Tasks</h3>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Subscribe to a plan to start completing tasks and earning money.
-          </p>
-          <Link to="/dashboard/plans">
-            <Button>View Plans</Button>
-          </Link>
+          <p className="mb-4 text-sm text-muted-foreground">Subscribe to a plan to start completing tasks and earning money.</p>
+          <Link to="/dashboard/plans"><Button>View Plans</Button></Link>
         </div>
       )}
 
-      {/* Browse Tasks */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-lg font-bold">Browse Tasks</h2>
         <Link to="/dashboard/tasks" className="flex items-center gap-1 text-sm text-primary hover:underline">
@@ -108,9 +105,7 @@ export default function Dashboard() {
             <h3 className="font-semibold">{cat.name}</h3>
             <p className="mb-4 text-sm text-muted-foreground">{cat.description}</p>
             <Link to="/dashboard/tasks">
-              <Button className="w-full gap-2" size="sm">
-                View Tasks <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+              <Button className="w-full gap-2" size="sm">View Tasks <ArrowRight className="h-3.5 w-3.5" /></Button>
             </Link>
           </div>
         ))}
