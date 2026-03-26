@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import PackagePopup from "@/components/PackagePopup";
 
 export default function TaskDetail() {
   const { id } = useParams();
@@ -17,6 +18,7 @@ export default function TaskDetail() {
   const { isActive } = useSubscription();
   const queryClient = useQueryClient();
   const [submission, setSubmission] = useState("");
+  const [showPackage, setShowPackage] = useState(false);
 
   const { data: task, isLoading } = useQuery({
     queryKey: ["task", id],
@@ -43,6 +45,10 @@ export default function TaskDetail() {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
+      if (!isActive) {
+        setShowPackage(true);
+        throw new Error("Package required");
+      }
       const { error } = await supabase.from("task_completions").insert({
         user_id: user!.id,
         task_id: id!,
@@ -56,7 +62,9 @@ export default function TaskDetail() {
       toast.success("Task submitted successfully!");
       queryClient.invalidateQueries({ queryKey: ["completion", id] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: any) => {
+      if (err.message !== "Package required") toast.error(err.message);
+    },
   });
 
   if (isLoading) {
@@ -67,7 +75,7 @@ export default function TaskDetail() {
     return <div className="py-20 text-center text-muted-foreground">Task not found</div>;
   }
 
-  const locked = task.requires_subscription && !isActive;
+  const locked = !isActive;
 
   return (
     <div className="mx-auto max-w-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -82,14 +90,14 @@ export default function TaskDetail() {
         </div>
         <h1 className="mb-2 text-2xl font-bold">{task.title}</h1>
         <p className="mb-6 text-muted-foreground">{task.description}</p>
-        <div className="mb-6 text-2xl font-bold text-primary">KES {task.reward}</div>
+        <div className="mb-6 text-2xl font-bold text-green-400">KES {task.reward}</div>
 
         {locked ? (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-6 text-center">
+          <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-6 text-center">
             <Lock className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold">Subscription Required</h3>
-            <p className="mb-4 text-sm text-muted-foreground">You need an active subscription to work on this task.</p>
-            <Button onClick={() => navigate("/dashboard/plans")}>View Plans</Button>
+            <h3 className="mb-2 font-semibold">Account Package Required</h3>
+            <p className="mb-4 text-sm text-muted-foreground">You need an active package to work on this task.</p>
+            <Button onClick={() => setShowPackage(true)} className="bg-purple-500 hover:bg-purple-600">View Packages</Button>
           </div>
         ) : existing ? (
           <div className="rounded-lg border border-border bg-secondary/50 p-4">
@@ -105,12 +113,14 @@ export default function TaskDetail() {
               onChange={(e) => setSubmission(e.target.value)}
               className="mb-4 min-h-[150px]"
             />
-            <Button onClick={() => submitMutation.mutate()} disabled={!submission.trim() || submitMutation.isPending}>
+            <Button onClick={() => submitMutation.mutate()} disabled={!submission.trim() || submitMutation.isPending} className="bg-green-500 hover:bg-green-600">
               {submitMutation.isPending ? "Submitting..." : "Submit Task"}
             </Button>
           </div>
         )}
       </div>
+
+      {showPackage && <PackagePopup onClose={() => setShowPackage(false)} />}
     </div>
   );
 }
