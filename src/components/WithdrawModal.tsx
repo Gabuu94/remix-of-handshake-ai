@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface Props {
   balance: number;
   onClose: () => void;
+  isActive?: boolean;
 }
 
-export default function WithdrawModal({ balance, onClose }: Props) {
+export default function WithdrawModal({ balance, onClose, isActive }: Props) {
   const [method, setMethod] = useState<"mpesa" | "paypal" | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -18,6 +19,10 @@ export default function WithdrawModal({ balance, onClose }: Props) {
   const [amount, setAmount] = useState("");
 
   const handleWithdraw = () => {
+    if (!isActive) {
+      toast.error("You need an active account package to withdraw funds.");
+      return;
+    }
     const amt = Number(amount);
     if (!amt || amt <= 0) {
       toast.error("Enter a valid amount");
@@ -34,8 +39,6 @@ export default function WithdrawModal({ balance, onClose }: Props) {
     if (method === "paypal") {
       if (!email.trim() || !email.includes("@")) { toast.error("Enter a valid PayPal email"); return; }
     }
-
-    // Simulate withdrawal (would connect to real API in production)
     toast.success(`Withdrawal of KES ${amt} via ${method === "mpesa" ? "M-Pesa" : "PayPal"} initiated successfully!`);
     onClose();
   };
@@ -49,11 +52,11 @@ export default function WithdrawModal({ balance, onClose }: Props) {
 
         {!method ? (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-primary">KES {balance}</span></p>
+            <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-green-400">KES {balance}</span></p>
             <p className="text-sm text-muted-foreground">Select withdrawal method:</p>
             <button
               onClick={() => setMethod("mpesa")}
-              className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-primary/50"
+              className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-green-500/50"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
                 <span className="text-lg font-bold text-green-400">M</span>
@@ -65,7 +68,7 @@ export default function WithdrawModal({ balance, onClose }: Props) {
             </button>
             <button
               onClick={() => setMethod("paypal")}
-              className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-primary/50"
+              className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-blue-500/50"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
                 <span className="text-sm font-bold text-blue-400">PP</span>
@@ -78,8 +81,7 @@ export default function WithdrawModal({ balance, onClose }: Props) {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-primary">KES {balance}</span></p>
-
+            <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-green-400">KES {balance}</span></p>
             {method === "mpesa" ? (
               <>
                 <div>
@@ -97,12 +99,10 @@ export default function WithdrawModal({ balance, onClose }: Props) {
                 <Input placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
               </div>
             )}
-
             <div>
               <Label>Amount (KES)</Label>
               <Input type="number" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} className="mt-1" />
             </div>
-
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setMethod(null)}>Back</Button>
               <Button className="flex-1" onClick={handleWithdraw}>Withdraw</Button>

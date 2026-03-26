@@ -2,20 +2,32 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, CheckCircle, Clock, DollarSign, TrendingUp, Code, Calculator, PenTool, Search } from "lucide-react";
+import { ArrowRight, DollarSign, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import WithdrawModal from "@/components/WithdrawModal";
+import PackagePopup from "@/components/PackagePopup";
 
 const taskCategories = [
-  { name: "Coding Tasks", description: "Programming & development tasks", icon: Code, category: "Code Review" },
-  { name: "Math Tasks", description: "Mathematical computations", icon: Calculator, category: "Mathematics" },
-  { name: "Writing Tasks", description: "Content creation & writing", icon: PenTool, category: "Research & Writing" },
-  { name: "Research Tasks", description: "Data research & analysis", icon: Search, category: "Data Annotation" },
+  { emoji: "📝", name: "Text Annotation", desc: "Tag and label text data", reward: "KES 50 - 100 per task" },
+  { emoji: "🏷️", name: "Content Classification", desc: "Categorize content items", reward: "KES 70 - 120 per task" },
+  { emoji: "📊", name: "Data Categorization", desc: "Organize data efficiently", reward: "KES 85 - 150 per task" },
+  { emoji: "🔍", name: "Pattern Recognition", desc: "Identify data patterns", reward: "KES 100 - 150 per task" },
+  { emoji: "🔤", name: "Sentence Arrangement", desc: "Arrange text sequences", reward: "KES 50 - 80 per task" },
+  { emoji: "🎁", name: "Refer & Earn", desc: "Invite friends to earn", reward: "KES 100 per user" },
+];
+
+const liveWithdrawals = [
+  { flag: "🇰🇪", phone: "+254 71***890", amount: "KES 2,500", time: "1 hour ago" },
+  { flag: "🇰🇪", phone: "+254 72***123", amount: "KES 4,800", time: "2 hours ago" },
+  { flag: "🇰🇪", phone: "+254 70***456", amount: "KES 1,200", time: "3 hours ago" },
 ];
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { isActive } = useSubscription();
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [showPackagePopup, setShowPackagePopup] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -24,14 +36,6 @@ export default function Dashboard() {
       return data;
     },
     enabled: !!user,
-  });
-
-  const { data: tasks } = useQuery({
-    queryKey: ["all-tasks-count"],
-    queryFn: async () => {
-      const { data } = await supabase.from("tasks").select("*").eq("is_active", true);
-      return data || [];
-    },
   });
 
   const { data: completions } = useQuery({
@@ -43,73 +47,135 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  const totalTasks = tasks?.length || 0;
-  const completedCount = completions?.filter(c => c.status === "approved").length || 0;
   const totalEarned = completions?.filter(c => c.status === "approved").reduce((sum, c) => sum + (c.earned_amount || 0), 0) || 0;
-  const myTaskIds = new Set(completions?.map(c => c.task_id) || []);
-  const availableTasks = totalTasks - myTaskIds.size;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
-  const stats = [
-    { label: "Available Tasks", value: availableTasks, sub: `${totalTasks} total`, icon: TrendingUp },
-    { label: "Total Earned", value: `KES ${totalEarned}`, sub: `${completedCount} tasks paid`, icon: DollarSign },
-    { label: "Completed", value: completedCount, sub: completedCount > 0 ? "Keep it up!" : "Start a task", icon: CheckCircle },
-    { label: "Tasks Available", value: totalTasks, sub: "New tasks added daily", icon: Clock },
-  ];
+  const today = new Date();
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dateStr = `${dayNames[today.getDay()]}, ${monthNames[today.getMonth()]} ${today.getDate()}`;
+
+  // Show package popup on mount if no active subscription
+  useEffect(() => {
+    if (!isActive) {
+      const timer = setTimeout(() => setShowPackagePopup(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive]);
+
+  const handleWithdraw = () => {
+    if (!isActive) {
+      setShowPackagePopup(true);
+      return;
+    }
+    setShowWithdraw(true);
+  };
+
+  const handleTaskClick = () => {
+    if (!isActive) {
+      setShowPackagePopup(true);
+      return;
+    }
+  };
 
   return (
     <div style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">
-          Welcome back, <span className="text-primary">{firstName}</span>
-        </h1>
-        <p className="text-muted-foreground">
-          {availableTasks > 0
-            ? `You have ${availableTasks} tasks available. Let's get to work.`
-            : "No tasks available right now. Check back soon!"}
-        </p>
+      {/* Header */}
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">Welcome back,</p>
+          <h1 className="text-2xl font-bold">{firstName}</h1>
+          <p className="text-sm text-muted-foreground">{dateStr}</p>
+        </div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500/20">
+          <span className="text-lg">✅</span>
+        </div>
       </div>
 
-      <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <stat.icon className="h-4 w-4 text-primary" />
+      {/* Balance Card */}
+      <div className="mb-6 rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-center gap-3 mb-2">
+          <DollarSign className="h-6 w-6 text-green-400" />
+          <span className="text-sm text-muted-foreground">Available Balance</span>
+        </div>
+        <p className="text-4xl font-bold">KES {totalEarned.toLocaleString()}.00</p>
+        <button
+          onClick={handleWithdraw}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-3 text-lg font-bold text-white hover:bg-green-600"
+        >
+          💸 Withdraw
+        </button>
+      </div>
+
+      {/* Stats Row */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="text-xs text-muted-foreground">Available Tasks</p>
+          <p className="mt-1 text-xl font-bold">961+</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="text-xs text-muted-foreground">Available</p>
+          <p className="mt-1 text-xl font-bold">24 hrs</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="text-xs text-muted-foreground">Active Users</p>
+          <p className="mt-1 text-xl font-bold">1,280</p>
+        </div>
+      </div>
+
+      {/* Live Withdrawals */}
+      <div className="mb-6">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-lg">🌍</span>
+          <h2 className="text-lg font-bold">Live Withdrawals</h2>
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">
+            <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" /> LIVE
+          </span>
+        </div>
+        {liveWithdrawals.map((w, i) => (
+          <div key={i} className="mb-2 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+            <span className="text-2xl">{w.flag}</span>
+            <div className="flex-1">
+              <p className="font-medium">{w.phone}</p>
+              <p className="text-xs text-green-400">✓ Withdrawal Successful</p>
             </div>
-            <p className="mt-2 text-2xl font-bold">{stat.value}</p>
-            <p className="mt-1 text-xs text-primary">{stat.sub}</p>
+            <div className="text-right">
+              <p className="font-bold">{w.amount}</p>
+              <p className="text-xs text-muted-foreground">⏱ {w.time}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      {!isActive && (
-        <div className="mb-10 rounded-xl border border-primary/30 bg-primary/5 p-6">
-          <h3 className="mb-2 text-lg font-semibold">Unlock Tasks</h3>
-          <p className="mb-4 text-sm text-muted-foreground">Subscribe to a plan to start completing tasks and earning money.</p>
-          <Link to="/dashboard/plans"><Button>View Plans</Button></Link>
+      {/* Start Earning - Task Categories */}
+      <div className="mb-6">
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <span>💼</span> Start Earning
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {taskCategories.map((cat) => (
+            <div key={cat.name} className="rounded-2xl border border-border bg-card p-4">
+              <p className="mb-1 text-2xl">{cat.emoji}</p>
+              <h3 className="font-bold text-sm">{cat.name}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{cat.desc}</p>
+              <p className="mt-2 text-xs font-semibold text-green-400">{cat.reward}</p>
+              <Link to={isActive ? "/dashboard/tasks" : "#"} onClick={handleTaskClick}>
+                <button className="mt-3 w-full rounded-xl bg-green-500 py-2 text-sm font-bold text-white hover:bg-green-600">
+                  Start Earning →
+                </button>
+              </Link>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {showWithdraw && (
+        <WithdrawModal balance={totalEarned} onClose={() => setShowWithdraw(false)} isActive={isActive} />
       )}
 
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-bold">Browse Tasks</h2>
-        <Link to="/dashboard/tasks" className="flex items-center gap-1 text-sm text-primary hover:underline">
-          View all <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {taskCategories.map((cat) => (
-          <div key={cat.name} className="rounded-xl border border-border bg-card p-5">
-            <cat.icon className="mb-4 h-8 w-8 text-primary" />
-            <h3 className="font-semibold">{cat.name}</h3>
-            <p className="mb-4 text-sm text-muted-foreground">{cat.description}</p>
-            <Link to="/dashboard/tasks">
-              <Button className="w-full gap-2" size="sm">View Tasks <ArrowRight className="h-3.5 w-3.5" /></Button>
-            </Link>
-          </div>
-        ))}
-      </div>
+      {showPackagePopup && (
+        <PackagePopup onClose={() => setShowPackagePopup(false)} />
+      )}
     </div>
   );
 }
