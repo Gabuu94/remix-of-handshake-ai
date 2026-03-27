@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
-import { Lock, Clock, CheckCircle, Sparkles } from "lucide-react";
+import { Lock, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -59,9 +59,14 @@ export default function Tasks() {
   });
 
   const getCompletion = (taskId: string) => completions?.find(c => c.task_id === taskId);
+  const completedCount = completions?.filter(c => c.status === "approved").length || 0;
+
+  // Free accounts: only 1 task allowed
+  const freeTaskLimit = 1;
+  const hasReachedFreeLimit = !isActive && completedCount >= freeTaskLimit;
 
   const handleTaskClick = (taskId: string) => {
-    if (!isActive) {
+    if (hasReachedFreeLimit) {
       setShowPackage(true);
       return;
     }
@@ -73,6 +78,13 @@ export default function Tasks() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">💼 Start Earning</h1>
         <p className="text-muted-foreground">Browse and complete tasks to earn KES.</p>
+        {!isActive && (
+          <div className="mt-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-2">
+            <p className="text-xs text-yellow-400">
+              ⚡ Free account: {freeTaskLimit - completedCount > 0 ? `${freeTaskLimit - completedCount} task remaining` : "Limit reached — upgrade to continue"}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -117,6 +129,13 @@ export default function Tasks() {
                 {isCompleted ? (
                   <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-2 text-xs font-semibold text-green-400">
                     <CheckCircle className="h-3 w-3" /> Completed
+                  </button>
+                ) : hasReachedFreeLimit ? (
+                  <button
+                    onClick={() => setShowPackage(true)}
+                    className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-2 text-xs font-semibold text-purple-400"
+                  >
+                    <Lock className="h-3 w-3" /> Upgrade to Unlock
                   </button>
                 ) : (
                   <button

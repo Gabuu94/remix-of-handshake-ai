@@ -1,19 +1,19 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, HelpCircle, DollarSign, User, LogOut, Menu, X, Bell } from "lucide-react";
+import { LayoutDashboard, HelpCircle, DollarSign, Home, LogOut, Menu, X, Bell } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const bottomNav = [
-  { label: "Transactions", path: "/dashboard/earnings", icon: LayoutDashboard },
-  { label: "Help", path: "/dashboard/plans", icon: HelpCircle },
+  { label: "Dashboard", path: "/dashboard", icon: Home },
+  { label: "Earnings", path: "/dashboard/earnings", icon: LayoutDashboard },
   { label: "Withdraw", path: "/dashboard/earnings", icon: DollarSign, isCenter: true },
-  { label: "Profile", path: "/dashboard", icon: User },
+  { label: "Help", path: "/dashboard/plans", icon: HelpCircle },
 ];
 
 const topNavItems = [
-  { label: "Overview", path: "/dashboard" },
+  { label: "Dashboard", path: "/dashboard" },
   { label: "Tasks", path: "/dashboard/tasks" },
   { label: "Earnings", path: "/dashboard/earnings" },
   { label: "Plans", path: "/dashboard/plans" },
@@ -122,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card md:hidden">
         <div className="flex items-center justify-around py-2">
           {bottomNav.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path && !item.isCenter;
             if (item.isCenter) {
               return (
                 <Link key={item.label} to={item.path} className="relative -mt-6">

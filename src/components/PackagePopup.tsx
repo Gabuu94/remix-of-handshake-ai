@@ -10,10 +10,10 @@ interface Props {
 }
 
 const planDetails: Record<string, { tasks: string; perTask: string; daily: string; monthly: string }> = {
-  Beginner: { tasks: "9 tasks/day", perTask: "KES 50 – 150/task", daily: "KES 2,000", monthly: "KES 50,000" },
-  "Average Skilled": { tasks: "15 tasks/day", perTask: "KES 100 – 250/task", daily: "KES 5,000", monthly: "KES 120,000" },
-  Expert: { tasks: "25 tasks/day", perTask: "KES 150 – 400/task", daily: "KES 8,000", monthly: "KES 200,000" },
-  Elite: { tasks: "40 tasks/day", perTask: "KES 300 – 600/task", daily: "KES 15,000", monthly: "KES 400,000" },
+  Beginner: { tasks: "9 tasks/day", perTask: "KES 80 – 180/task", daily: "KES 500", monthly: "KES 15,000" },
+  "Average Skilled": { tasks: "15 tasks/day", perTask: "KES 120 – 280/task", daily: "KES 870", monthly: "KES 26,000" },
+  Expert: { tasks: "25 tasks/day", perTask: "KES 180 – 400/task", daily: "KES 1,200", monthly: "KES 36,000" },
+  Elite: { tasks: "40 tasks/day", perTask: "KES 250 – 500/task", daily: "KES 1,400", monthly: "KES 42,000" },
 };
 
 export default function PackagePopup({ onClose }: Props) {
