@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const questions = [
   {
@@ -43,11 +47,14 @@ type Phase = "intro" | "quiz" | "result" | "bonus";
 
 export default function Assessment() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [phase, setPhase] = useState<Phase>("intro");
   const [current, setCurrent] = useState(0);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
+  const [claiming, setClaiming] = useState(false);
 
   const handleWordTap = (word: string) => {
     const q = questions[current];
@@ -83,6 +90,23 @@ export default function Assessment() {
     } else {
       setPhase("result");
     }
+  };
+
+  const handleClaimBonus = async () => {
+    setClaiming(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("claim-bonus");
+      if (error) throw error;
+      if (data?.success) {
+        toast.success("KES 600 bonus credited to your account!");
+        queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
+    } catch (err: any) {
+      console.error("Bonus claim error:", err);
+    }
+    setClaiming(false);
+    navigate("/dashboard");
   };
 
   const percentage = Math.round((score / questions.length) * 100);
@@ -215,11 +239,11 @@ export default function Assessment() {
         <h2 className="mt-4 text-center text-2xl font-bold">Welcome Bonus</h2>
 
         <div className="mt-4 rounded-xl border border-border bg-secondary/50 p-6 text-center">
-          <p className="text-sm text-muted-foreground">KES</p>
-          <p className="text-5xl font-bold text-green-400">KES 600.00</p>
+          <p className="text-sm text-muted-foreground">You've earned</p>
+          <p className="text-5xl font-bold text-green-400">KES 600</p>
         </div>
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">Credited to your account</p>
+        <p className="mt-4 text-center text-sm text-muted-foreground">Will be credited to your available balance</p>
 
         <div className="mt-4 space-y-2">
           {["Available for instant use", "No withdrawal maximum", "Start earning immediately"].map((t) => (
@@ -230,10 +254,11 @@ export default function Assessment() {
         </div>
 
         <button
-          onClick={() => navigate("/dashboard")}
-          className="mt-6 w-full rounded-2xl bg-green-500 py-4 text-lg font-bold text-white hover:bg-green-600"
+          onClick={handleClaimBonus}
+          disabled={claiming}
+          className="mt-6 w-full rounded-2xl bg-green-500 py-4 text-lg font-bold text-white hover:bg-green-600 disabled:opacity-50"
         >
-          Claim & Continue →
+          {claiming ? "Claiming..." : "Claim & Continue →"}
         </button>
       </div>
 

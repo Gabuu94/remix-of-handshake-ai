@@ -1,31 +1,27 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useBalance } from "@/hooks/useBalance";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, DollarSign, CheckCircle2 } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import WithdrawModal from "@/components/WithdrawModal";
 import PackagePopup from "@/components/PackagePopup";
 
 const taskCategories = [
-  { emoji: "📝", name: "Text Annotation", desc: "Tag and label text data", reward: "KES 50 - 100 per task" },
-  { emoji: "🏷️", name: "Content Classification", desc: "Categorize content items", reward: "KES 70 - 120 per task" },
-  { emoji: "📊", name: "Data Categorization", desc: "Organize data efficiently", reward: "KES 85 - 150 per task" },
-  { emoji: "🔍", name: "Pattern Recognition", desc: "Identify data patterns", reward: "KES 100 - 150 per task" },
-  { emoji: "🔤", name: "Sentence Arrangement", desc: "Arrange text sequences", reward: "KES 50 - 80 per task" },
-  { emoji: "🎁", name: "Refer & Earn", desc: "Invite friends to earn", reward: "KES 100 per user" },
-];
-
-const liveWithdrawals = [
-  { flag: "🇰🇪", phone: "+254 71***890", amount: "KES 2,500", time: "1 hour ago" },
-  { flag: "🇰🇪", phone: "+254 72***123", amount: "KES 4,800", time: "2 hours ago" },
-  { flag: "🇰🇪", phone: "+254 70***456", amount: "KES 1,200", time: "3 hours ago" },
+  { emoji: "📝", name: "Text Annotation", desc: "Tag and label text data", reward: "KES 80 - 150 per task" },
+  { emoji: "🏷️", name: "Content Classification", desc: "Categorize content items", reward: "KES 100 - 170 per task" },
+  { emoji: "📊", name: "Data Categorization", desc: "Organize data efficiently", reward: "KES 115 - 200 per task" },
+  { emoji: "🔍", name: "Pattern Recognition", desc: "Identify data patterns", reward: "KES 130 - 200 per task" },
+  { emoji: "🔤", name: "Sentence Arrangement", desc: "Arrange text sequences", reward: "KES 80 - 130 per task" },
+  { emoji: "🎁", name: "Refer & Earn", desc: "Invite friends to earn", reward: "KES 150 per user" },
 ];
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { isActive } = useSubscription();
+  const { balance } = useBalance();
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showPackagePopup, setShowPackagePopup] = useState(false);
 
@@ -47,7 +43,7 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  const totalEarned = completions?.filter(c => c.status === "approved").reduce((sum, c) => sum + (c.earned_amount || 0), 0) || 0;
+  const tasksCompleted = completions?.filter(c => c.status === "approved").length || 0;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
   const today = new Date();
@@ -98,7 +94,7 @@ export default function Dashboard() {
           <DollarSign className="h-6 w-6 text-green-400" />
           <span className="text-sm text-muted-foreground">Available Balance</span>
         </div>
-        <p className="text-4xl font-bold">KES {totalEarned.toLocaleString()}.00</p>
+        <p className="text-4xl font-bold">KES {balance.toLocaleString()}.00</p>
         <button
           onClick={handleWithdraw}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-3 text-lg font-bold text-white hover:bg-green-600"
@@ -110,8 +106,8 @@ export default function Dashboard() {
       {/* Stats Row */}
       <div className="mb-6 grid grid-cols-3 gap-3">
         <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="text-xs text-muted-foreground">Available Tasks</p>
-          <p className="mt-1 text-xl font-bold">961+</p>
+          <p className="text-xs text-muted-foreground">Tasks Done</p>
+          <p className="mt-1 text-xl font-bold">{tasksCompleted}</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4 text-center">
           <p className="text-xs text-muted-foreground">Available</p>
@@ -121,30 +117,6 @@ export default function Dashboard() {
           <p className="text-xs text-muted-foreground">Active Users</p>
           <p className="mt-1 text-xl font-bold">1,280</p>
         </div>
-      </div>
-
-      {/* Live Withdrawals */}
-      <div className="mb-6">
-        <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">🌍</span>
-          <h2 className="text-lg font-bold">Live Withdrawals</h2>
-          <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-400">
-            <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" /> LIVE
-          </span>
-        </div>
-        {liveWithdrawals.map((w, i) => (
-          <div key={i} className="mb-2 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
-            <span className="text-2xl">{w.flag}</span>
-            <div className="flex-1">
-              <p className="font-medium">{w.phone}</p>
-              <p className="text-xs text-green-400">✓ Withdrawal Successful</p>
-            </div>
-            <div className="text-right">
-              <p className="font-bold">{w.amount}</p>
-              <p className="text-xs text-muted-foreground">⏱ {w.time}</p>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Start Earning - Task Categories */}
@@ -170,7 +142,7 @@ export default function Dashboard() {
       </div>
 
       {showWithdraw && (
-        <WithdrawModal balance={totalEarned} onClose={() => setShowWithdraw(false)} isActive={isActive} />
+        <WithdrawModal balance={balance} onClose={() => setShowWithdraw(false)} isActive={isActive} />
       )}
 
       {showPackagePopup && (

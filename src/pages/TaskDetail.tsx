@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -19,6 +19,7 @@ export default function TaskDetail() {
   const queryClient = useQueryClient();
   const [submission, setSubmission] = useState("");
   const [showPackage, setShowPackage] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: task, isLoading } = useQuery({
     queryKey: ["task", id],
@@ -43,29 +44,46 @@ export default function TaskDetail() {
     enabled: !!user,
   });
 
-  const submitMutation = useMutation({
-    mutationFn: async () => {
-      if (!isActive) {
-        setShowPackage(true);
-        throw new Error("Package required");
-      }
-      const { error } = await supabase.from("task_completions").insert({
-        user_id: user!.id,
-        task_id: id!,
-        submission_text: submission,
-        status: "submitted",
-        earned_amount: task!.reward,
+  const { data: completions } = useQuery({
+    queryKey: ["my-completions", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("task_completions").select("*").eq("user_id", user!.id);
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const completedCount = completions?.filter(c => c.status === "approved").length || 0;
+  const hasReachedFreeLimit = !isActive && completedCount >= 1;
+
+  const handleSubmit = async () => {
+    if (hasReachedFreeLimit) {
+      setShowPackage(true);
+      return;
+    }
+    if (!submission.trim()) {
+      toast.error("Please enter your submission");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("complete-task", {
+        body: { task_id: id, submission_text: submission },
       });
       if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Task submitted successfully!");
+      if (!data?.success) throw new Error(data?.error || "Failed to submit");
+
+      toast.success(`Task completed! You earned KES ${data.earned}. Balance: KES ${data.balance}`);
       queryClient.invalidateQueries({ queryKey: ["completion", id] });
-    },
-    onError: (err: any) => {
-      if (err.message !== "Package required") toast.error(err.message);
-    },
-  });
+      queryClient.invalidateQueries({ queryKey: ["my-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
+      queryClient.invalidateQueries({ queryKey: ["earnings"] });
+      queryClient.invalidateQueries({ queryKey: ["completions-stats"] });
+    } catch (err: any) {
+      toast.error(err.message || "Submission failed");
+    }
+    setSubmitting(false);
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
@@ -74,8 +92,6 @@ export default function TaskDetail() {
   if (!task) {
     return <div className="py-20 text-center text-muted-foreground">Task not found</div>;
   }
-
-  const locked = !isActive;
 
   return (
     <div className="mx-auto max-w-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -92,16 +108,16 @@ export default function TaskDetail() {
         <p className="mb-6 text-muted-foreground">{task.description}</p>
         <div className="mb-6 text-2xl font-bold text-green-400">KES {task.reward}</div>
 
-        {locked ? (
+        {hasReachedFreeLimit && !existing ? (
           <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-6 text-center">
             <Lock className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold">Account Package Required</h3>
-            <p className="mb-4 text-sm text-muted-foreground">You need an active package to work on this task.</p>
+            <h3 className="mb-2 font-semibold">Free Task Limit Reached</h3>
+            <p className="mb-4 text-sm text-muted-foreground">Upgrade your account to continue earning with unlimited tasks.</p>
             <Button onClick={() => setShowPackage(true)} className="bg-purple-500 hover:bg-purple-600">View Packages</Button>
           </div>
         ) : existing ? (
-          <div className="rounded-lg border border-border bg-secondary/50 p-4">
-            <p className="font-medium">Status: <span className="capitalize">{existing.status}</span></p>
+          <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-4">
+            <p className="font-medium text-green-400">✓ Completed — KES {existing.earned_amount} earned</p>
             {existing.submission_text && <p className="mt-2 text-sm text-muted-foreground">{existing.submission_text}</p>}
           </div>
         ) : (
@@ -113,8 +129,8 @@ export default function TaskDetail() {
               onChange={(e) => setSubmission(e.target.value)}
               className="mb-4 min-h-[150px]"
             />
-            <Button onClick={() => submitMutation.mutate()} disabled={!submission.trim() || submitMutation.isPending} className="bg-green-500 hover:bg-green-600">
-              {submitMutation.isPending ? "Submitting..." : "Submit Task"}
+            <Button onClick={handleSubmit} disabled={!submission.trim() || submitting} className="bg-green-500 hover:bg-green-600">
+              {submitting ? "Submitting..." : "Submit Task"}
             </Button>
           </div>
         )}

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useBalance } from "@/hooks/useBalance";
 import { DollarSign, TrendingUp, Calendar, CheckCircle, Wallet } from "lucide-react";
 import { useState, useMemo } from "react";
 import WithdrawModal from "@/components/WithdrawModal";
@@ -10,6 +11,7 @@ import PackagePopup from "@/components/PackagePopup";
 export default function Earnings() {
   const { user } = useAuth();
   const { isActive } = useSubscription();
+  const { balance } = useBalance();
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showPackage, setShowPackage] = useState(false);
 
@@ -79,7 +81,7 @@ export default function Earnings() {
             <Wallet className="h-5 w-5 text-green-400" />
             <div>
               <p className="font-semibold">Available Balance</p>
-              <p className="text-2xl font-bold text-green-400">KES {totalEarned}</p>
+              <p className="text-2xl font-bold text-green-400">KES {balance.toLocaleString()}</p>
             </div>
           </div>
           <button
@@ -148,7 +150,7 @@ export default function Earnings() {
         )}
       </div>
 
-      {showWithdraw && <WithdrawModal balance={totalEarned} onClose={() => setShowWithdraw(false)} isActive={isActive} />}
+      {showWithdraw && <WithdrawModal balance={balance} onClose={() => setShowWithdraw(false)} isActive={isActive} />}
       {showPackage && <PackagePopup onClose={() => setShowPackage(false)} />}
     </div>
   );
