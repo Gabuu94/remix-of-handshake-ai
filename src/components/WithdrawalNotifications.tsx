@@ -16,17 +16,19 @@ const sampleWithdrawals = [
 export default function WithdrawalNotifications() {
   const [notification, setNotification] = useState<{ phone: string; amount: number } | null>(null);
   const [visible, setVisible] = useState(false);
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
   useEffect(() => {
     const show = () => {
       const item = sampleWithdrawals[Math.floor(Math.random() * sampleWithdrawals.length)];
       setNotification(item);
+      setSecondsAgo(Math.floor(Math.random() * 30) + 2);
       setVisible(true);
       setTimeout(() => setVisible(false), 4000);
     };
 
-    const interval = setInterval(show, 15000 + Math.random() * 10000);
-    const initial = setTimeout(show, 5000);
+    const interval = setInterval(show, 12000 + Math.random() * 8000);
+    const initial = setTimeout(show, 4000);
 
     return () => {
       clearInterval(interval);
@@ -37,16 +39,16 @@ export default function WithdrawalNotifications() {
   if (!notification || !visible) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-lg">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
+    <div className="fixed top-4 right-4 z-[100] animate-in slide-in-from-right-full fade-in duration-500">
+      <div className="flex items-center gap-3 rounded-xl border border-green-500/30 bg-card/95 backdrop-blur-sm px-4 py-3 shadow-xl max-w-xs">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500/20 shrink-0">
           <span className="text-sm font-bold text-green-400">M</span>
         </div>
-        <div>
-          <p className="text-sm font-medium">
-            {notification.phone} withdrew <span className="text-green-400">KES {notification.amount.toLocaleString()}</span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium truncate">
+            {notification.phone} withdrew <span className="text-green-400 font-bold">KES {notification.amount.toLocaleString()}</span>
           </p>
-          <p className="text-xs text-muted-foreground">via M-Pesa • just now</p>
+          <p className="text-xs text-muted-foreground">via M-Pesa • {secondsAgo}s ago</p>
         </div>
       </div>
     </div>
