@@ -96,28 +96,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          balance: number
           created_at: string
           full_name: string | null
           id: string
           phone_number: string | null
           updated_at: string
           user_id: string
+          welcome_bonus_claimed: boolean
         }
         Insert: {
+          balance?: number
           created_at?: string
           full_name?: string | null
           id?: string
           phone_number?: string | null
           updated_at?: string
           user_id: string
+          welcome_bonus_claimed?: boolean
         }
         Update: {
+          balance?: number
           created_at?: string
           full_name?: string | null
           id?: string
           phone_number?: string | null
           updated_at?: string
           user_id?: string
+          welcome_bonus_claimed?: boolean
         }
         Relationships: []
       }
