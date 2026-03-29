@@ -12,7 +12,7 @@ export function useBalance() {
         .from("profiles")
         .select("balance, welcome_bonus_claimed")
         .eq("user_id", user!.id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
