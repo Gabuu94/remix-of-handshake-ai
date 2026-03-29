@@ -54,7 +54,7 @@ export default function TaskDetail() {
   });
 
   const completedCount = completions?.filter(c => c.status === "approved").length || 0;
-  const hasReachedFreeLimit = !isActive && completedCount >= 1;
+  const hasReachedFreeLimit = !isActive && completedCount >= 2;
 
   const handleSubmit = async () => {
     if (hasReachedFreeLimit) {
