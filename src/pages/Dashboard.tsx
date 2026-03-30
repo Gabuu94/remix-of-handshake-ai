@@ -99,44 +99,44 @@ export default function Dashboard() {
   return (
     <div style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Welcome back,</p>
-          <h1 className="text-2xl font-bold">{firstName}</h1>
+          <p className="text-xs text-muted-foreground">Welcome back,</p>
+          <h1 className="text-lg font-bold">{firstName}</h1>
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500/20">
-          <span className="text-lg">✅</span>
-        </div>
+        <span className="text-base">✅</span>
       </div>
 
       {/* Balance Card */}
-      <div className="mb-6 rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">💰</span>
-          <span className="text-sm text-muted-foreground">Available Balance</span>
+      <div className="mb-3 rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💰</span>
+            <span className="text-xs text-muted-foreground">Available Balance</span>
+          </div>
         </div>
-        <p className="text-4xl font-bold">KES {balance.toLocaleString()}.00</p>
+        <p className="text-2xl font-bold mb-2">KES {balance.toLocaleString()}.00</p>
         <button
           onClick={handleWithdraw}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 py-3 text-lg font-bold text-white hover:bg-green-600"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-2.5 text-sm font-bold text-white hover:bg-green-600"
         >
           💸 Withdraw
         </button>
       </div>
 
       {/* Stats Row */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="text-xs text-muted-foreground">Available Tasks</p>
-          <p className="mt-1 text-xl font-bold">{tasks?.length || 0}+</p>
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+          <p className="text-[10px] text-muted-foreground">Tasks</p>
+          <p className="text-base font-bold">{tasks?.length || 0}+</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="text-xs text-muted-foreground">Available</p>
-          <p className="mt-1 text-xl font-bold">24 hrs</p>
+        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+          <p className="text-[10px] text-muted-foreground">Available</p>
+          <p className="text-base font-bold">24 hrs</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="text-xs text-muted-foreground">Active Users</p>
-          <p className="mt-1 text-xl font-bold">1,205</p>
+        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+          <p className="text-[10px] text-muted-foreground">Active Users</p>
+          <p className="text-base font-bold">1,205</p>
         </div>
       </div>
 
@@ -145,16 +145,16 @@ export default function Dashboard() {
 
       {/* Free plan notice */}
       {!isActive && (
-        <div className="mb-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-2">
-          <p className="text-xs text-yellow-400">
-            ⚡ Free account: {FREE_TASK_LIMIT - tasksCompleted > 0 ? `${FREE_TASK_LIMIT - tasksCompleted} surveys remaining` : "Limit reached — upgrade to continue"}
+        <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-1.5">
+          <p className="text-[11px] text-yellow-400">
+            ⚡ Free: {FREE_TASK_LIMIT - tasksCompleted > 0 ? `${FREE_TASK_LIMIT - tasksCompleted} surveys left` : "Limit reached — upgrade"}
           </p>
         </div>
       )}
 
       {/* Start Earning - All Surveys */}
       <div className="mb-6">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+        <h2 className="mb-3 flex items-center gap-2 text-base font-bold">
           <span>💼</span> Start Earning
         </h2>
         <div className="grid grid-cols-2 gap-3">

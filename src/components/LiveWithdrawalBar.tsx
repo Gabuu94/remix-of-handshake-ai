@@ -31,10 +31,10 @@ export default function LiveWithdrawalBar() {
   const item = sampleWithdrawals[currentIndex];
 
   return (
-    <div className="mb-6">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="text-lg">🌍</span>
-        <h3 className="font-bold">Live Withdrawals</h3>
+    <div className="mb-3">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-sm">🌍</span>
+        <h3 className="text-sm font-bold">Live Withdrawals</h3>
         <span className="ml-auto flex items-center gap-1 rounded-full bg-green-500/20 border border-green-500/40 px-2.5 py-0.5 text-[10px] font-semibold text-green-400">
           <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
           LIVE
@@ -42,7 +42,7 @@ export default function LiveWithdrawalBar() {
       </div>
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <div
-          className={`flex items-center gap-3 p-4 transition-all duration-500 ${
+          className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-500 ${
             isSliding ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
           }`}
         >
