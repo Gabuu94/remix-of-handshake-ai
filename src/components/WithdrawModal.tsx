@@ -14,6 +14,27 @@ interface Props {
 
 type Method = "mpesa" | "paypal" | "bank" | null;
 
+function UpgradePrompt({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate();
+  return (
+    <div className="space-y-4 text-center py-4">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/20">
+        <span className="text-3xl">🔒</span>
+      </div>
+      <h3 className="text-lg font-bold">Upgrade Required</h3>
+      <p className="text-sm text-muted-foreground">
+        You need an active package to withdraw funds. Upgrade your account to unlock instant M-Pesa withdrawals.
+      </p>
+      <div className="flex gap-2">
+        <Button variant="outline" className="flex-1" onClick={onClose}>Later</Button>
+        <Button className="flex-1 bg-purple-500 hover:bg-purple-600" onClick={() => { onClose(); navigate("/dashboard/plans"); }}>
+          Upgrade Now ✨
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function WithdrawModal({ balance, onClose, isActive }: Props) {
   const [method, setMethod] = useState<Method>(null);
   const [name, setName] = useState("");
