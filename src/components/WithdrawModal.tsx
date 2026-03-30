@@ -49,12 +49,13 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
           <DialogTitle>Withdraw Funds</DialogTitle>
         </DialogHeader>
 
-        {!method ? (
+        {showUpgrade ? (
+          <UpgradePrompt onClose={onClose} />
+        ) : !method ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-green-400">KES {balance.toLocaleString()}</span></p>
             <p className="text-sm text-muted-foreground">Select withdrawal method:</p>
 
-            {/* M-Pesa / Mobile Money - Active */}
             <button
               onClick={() => setMethod("mpesa")}
               className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-green-500/50"
@@ -68,7 +69,6 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
               </div>
             </button>
 
-            {/* PayPal - Not Available */}
             <div className="relative flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/10 p-4 opacity-50 cursor-not-allowed">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
                 <span className="text-sm font-bold text-blue-400">PP</span>
@@ -80,7 +80,6 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
               <span className="rounded-full bg-yellow-500/20 border border-yellow-500/40 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">Coming Soon</span>
             </div>
 
-            {/* Bank Transfer - Not Available */}
             <div className="relative flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/10 p-4 opacity-50 cursor-not-allowed">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20">
                 <span className="text-sm font-bold text-purple-400">BT</span>
