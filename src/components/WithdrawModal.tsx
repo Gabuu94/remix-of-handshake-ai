@@ -19,9 +19,11 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
 
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
   const handleWithdraw = () => {
     if (!isActive) {
-      toast.error("You need an active account package to withdraw funds.");
+      setShowUpgrade(true);
       return;
     }
     const amt = Number(amount);
