@@ -79,10 +79,6 @@ export default function Dashboard() {
   }, [isActive]);
 
   const handleWithdraw = () => {
-    if (!isActive) {
-      setShowPackagePopup(true);
-      return;
-    }
     setShowWithdraw(true);
   };
 

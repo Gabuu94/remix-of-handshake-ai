@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,15 +14,38 @@ interface Props {
 
 type Method = "mpesa" | "paypal" | "bank" | null;
 
+function UpgradePrompt({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate();
+  return (
+    <div className="space-y-4 text-center py-4">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/20">
+        <span className="text-3xl">🔒</span>
+      </div>
+      <h3 className="text-lg font-bold">Upgrade Required</h3>
+      <p className="text-sm text-muted-foreground">
+        You need an active package to withdraw funds. Upgrade your account to unlock instant M-Pesa withdrawals.
+      </p>
+      <div className="flex gap-2">
+        <Button variant="outline" className="flex-1" onClick={onClose}>Later</Button>
+        <Button className="flex-1 bg-purple-500 hover:bg-purple-600" onClick={() => { onClose(); navigate("/dashboard/plans"); }}>
+          Upgrade Now ✨
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function WithdrawModal({ balance, onClose, isActive }: Props) {
   const [method, setMethod] = useState<Method>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
 
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
   const handleWithdraw = () => {
     if (!isActive) {
-      toast.error("You need an active account package to withdraw funds.");
+      setShowUpgrade(true);
       return;
     }
     const amt = Number(amount);
@@ -46,12 +70,13 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
           <DialogTitle>Withdraw Funds</DialogTitle>
         </DialogHeader>
 
-        {!method ? (
+        {showUpgrade ? (
+          <UpgradePrompt onClose={onClose} />
+        ) : !method ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Available: <span className="font-bold text-green-400">KES {balance.toLocaleString()}</span></p>
             <p className="text-sm text-muted-foreground">Select withdrawal method:</p>
 
-            {/* M-Pesa / Mobile Money - Active */}
             <button
               onClick={() => setMethod("mpesa")}
               className="flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:border-green-500/50"
@@ -65,7 +90,6 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
               </div>
             </button>
 
-            {/* PayPal - Not Available */}
             <div className="relative flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/10 p-4 opacity-50 cursor-not-allowed">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
                 <span className="text-sm font-bold text-blue-400">PP</span>
@@ -77,7 +101,6 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
               <span className="rounded-full bg-yellow-500/20 border border-yellow-500/40 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">Coming Soon</span>
             </div>
 
-            {/* Bank Transfer - Not Available */}
             <div className="relative flex w-full items-center gap-3 rounded-xl border border-border bg-secondary/10 p-4 opacity-50 cursor-not-allowed">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20">
                 <span className="text-sm font-bold text-purple-400">BT</span>
