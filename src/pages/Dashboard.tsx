@@ -145,16 +145,16 @@ export default function Dashboard() {
 
       {/* Free plan notice */}
       {!isActive && (
-        <div className="mb-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-2">
-          <p className="text-xs text-yellow-400">
-            ⚡ Free account: {FREE_TASK_LIMIT - tasksCompleted > 0 ? `${FREE_TASK_LIMIT - tasksCompleted} surveys remaining` : "Limit reached — upgrade to continue"}
+        <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-1.5">
+          <p className="text-[11px] text-yellow-400">
+            ⚡ Free: {FREE_TASK_LIMIT - tasksCompleted > 0 ? `${FREE_TASK_LIMIT - tasksCompleted} surveys left` : "Limit reached — upgrade"}
           </p>
         </div>
       )}
 
       {/* Start Earning - All Surveys */}
       <div className="mb-6">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+        <h2 className="mb-3 flex items-center gap-2 text-base font-bold">
           <span>💼</span> Start Earning
         </h2>
         <div className="grid grid-cols-2 gap-3">

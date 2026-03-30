@@ -42,7 +42,7 @@ export default function LiveWithdrawalBar() {
       </div>
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <div
-          className={`flex items-center gap-3 p-4 transition-all duration-500 ${
+          className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-500 ${
             isSliding ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
           }`}
         >
