@@ -14,10 +14,10 @@ const planIcons: Record<string, any> = {
 };
 
 const planFeatures: Record<string, string[]> = {
-  Beginner: ["9 tasks per day", "KES 50 – KES 150 per task", "KES 2,000 daily expected", "KES 50,000 monthly expected", "M-Pesa withdrawals"],
-  "Average Skilled": ["15 tasks per day", "KES 100 – KES 250 per task", "KES 5,000 daily expected", "KES 120,000 monthly expected", "Priority support"],
-  Expert: ["25 tasks per day", "KES 150 – KES 400 per task", "KES 8,000 daily expected", "KES 200,000 monthly expected", "Premium tasks access"],
-  Elite: ["40 tasks per day", "KES 300 – KES 600 per task", "KES 15,000 daily expected", "KES 400,000 monthly expected", "VIP support & bonuses"],
+  Beginner: ["9 tasks per day", "KES 80 – KES 180 per task", "KES 500 daily expected", "KES 15,000 monthly expected", "M-Pesa withdrawals"],
+  "Average Skilled": ["15 tasks per day", "KES 120 – KES 280 per task", "KES 870 daily expected", "KES 26,000 monthly expected", "Priority support"],
+  Expert: ["25 tasks per day", "KES 180 – KES 400 per task", "KES 1,200 daily expected", "KES 36,000 monthly expected", "Premium tasks access"],
+  Elite: ["40 tasks per day", "KES 250 – KES 500 per task", "KES 1,400 daily expected", "KES 42,000 monthly expected", "VIP support & bonuses"],
 };
 
 export default function Plans() {
