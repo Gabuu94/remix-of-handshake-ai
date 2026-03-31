@@ -10,6 +10,7 @@ import { ArrowLeft, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import PackagePopup from "@/components/PackagePopup";
+import { formatMoney } from "@/lib/currency";
 
 export default function TaskDetail() {
   const { id } = useParams();
@@ -33,12 +34,7 @@ export default function TaskDetail() {
   const { data: existing } = useQuery({
     queryKey: ["completion", id, user?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("task_completions")
-        .select("*")
-        .eq("task_id", id!)
-        .eq("user_id", user!.id)
-        .maybeSingle();
+      const { data } = await supabase.from("task_completions").select("*").eq("task_id", id!).eq("user_id", user!.id).maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -57,14 +53,8 @@ export default function TaskDetail() {
   const hasReachedFreeLimit = !isActive && completedCount >= 2;
 
   const handleSubmit = async () => {
-    if (hasReachedFreeLimit) {
-      setShowPackage(true);
-      return;
-    }
-    if (!submission.trim()) {
-      toast.error("Please enter your submission");
-      return;
-    }
+    if (hasReachedFreeLimit) { setShowPackage(true); return; }
+    if (!submission.trim()) { toast.error("Please enter your submission"); return; }
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("complete-task", {
@@ -73,7 +63,7 @@ export default function TaskDetail() {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Failed to submit");
 
-      toast.success(`Task completed! You earned KES ${data.earned}. Balance: KES ${data.balance}`);
+      toast.success(`Task completed! You earned ${formatMoney(data.earned)}. Balance: ${formatMoney(data.balance)}`);
       queryClient.invalidateQueries({ queryKey: ["completion", id] });
       queryClient.invalidateQueries({ queryKey: ["my-completions"] });
       queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
@@ -106,7 +96,7 @@ export default function TaskDetail() {
         </div>
         <h1 className="mb-2 text-2xl font-bold">{task.title}</h1>
         <p className="mb-6 text-muted-foreground">{task.description}</p>
-        <div className="mb-6 text-2xl font-bold text-green-400">KES {task.reward}</div>
+        <div className="mb-6 text-2xl font-bold text-green-400">{formatMoney(task.reward)}</div>
 
         {hasReachedFreeLimit && !existing ? (
           <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-6 text-center">
@@ -117,18 +107,13 @@ export default function TaskDetail() {
           </div>
         ) : existing ? (
           <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-4">
-            <p className="font-medium text-green-400">✓ Completed — KES {existing.earned_amount} earned</p>
+            <p className="font-medium text-green-400">✓ Completed — {formatMoney(existing.earned_amount || 0)} earned</p>
             {existing.submission_text && <p className="mt-2 text-sm text-muted-foreground">{existing.submission_text}</p>}
           </div>
         ) : (
           <div>
             <h3 className="mb-3 font-semibold">Submit Your Response</h3>
-            <Textarea
-              placeholder="Enter your task submission here..."
-              value={submission}
-              onChange={(e) => setSubmission(e.target.value)}
-              className="mb-4 min-h-[150px]"
-            />
+            <Textarea placeholder="Enter your task submission here..." value={submission} onChange={(e) => setSubmission(e.target.value)} className="mb-4 min-h-[150px]" />
             <Button onClick={handleSubmit} disabled={!submission.trim() || submitting} className="bg-green-500 hover:bg-green-600">
               {submitting ? "Submitting..." : "Submit Task"}
             </Button>
