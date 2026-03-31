@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Crown, Lock } from "lucide-react";
+import { Crown, Lock, Star } from "lucide-react";
 import { useState } from "react";
 import PaymentModal from "./PaymentModal";
 
@@ -10,10 +10,10 @@ interface Props {
 }
 
 const planDetails: Record<string, { tasks: string; perTask: string; daily: string; monthly: string }> = {
-  Beginner: { tasks: "9 tasks/day", perTask: "KES 80 – 180/task", daily: "KES 500", monthly: "KES 15,000" },
-  "Average Skilled": { tasks: "15 tasks/day", perTask: "KES 120 – 280/task", daily: "KES 870", monthly: "KES 26,000" },
-  Expert: { tasks: "25 tasks/day", perTask: "KES 180 – 400/task", daily: "KES 1,200", monthly: "KES 36,000" },
-  Elite: { tasks: "40 tasks/day", perTask: "KES 250 – 500/task", daily: "KES 1,400", monthly: "KES 42,000" },
+  Beginner: { tasks: "9 tasks/day", perTask: "$0.90 – 1.80/task", daily: "$16.50", monthly: "$400" },
+  "Average Skilled": { tasks: "15 tasks/day", perTask: "$1.20 – 2.80/task", daily: "$22.00", monthly: "$650" },
+  Expert: { tasks: "25 tasks/day", perTask: "$1.80 – 4.00/task", daily: "$30.00", monthly: "$900" },
+  Elite: { tasks: "40 tasks/day", perTask: "$2.50 – 5.00/task", daily: "$40.00", monthly: "$1,200" },
 };
 
 export default function PackagePopup({ onClose }: Props) {
@@ -46,7 +46,7 @@ export default function PackagePopup({ onClose }: Props) {
           <div className="mt-2 space-y-3">
             {plans?.map((plan) => {
               const details = planDetails[plan.name] || planDetails.Beginner;
-              const isPopular = plan.name === "Expert";
+              const isPopular = plan.name === "Average Skilled";
               return (
                 <div
                   key={plan.id}
@@ -57,7 +57,7 @@ export default function PackagePopup({ onClose }: Props) {
                 >
                   {isPopular && (
                     <span className="absolute -top-2 right-3 inline-flex items-center gap-1 rounded-full bg-yellow-500/20 border border-yellow-500/40 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
-                      <Crown className="h-3 w-3" /> POPULAR
+                      <Star className="h-3 w-3" /> POPULAR
                     </span>
                   )}
                   <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export default function PackagePopup({ onClose }: Props) {
                       <p className="text-xs text-green-400">Daily: {details.daily} • Monthly: {details.monthly}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-purple-400">KES {plan.price}</p>
+                      <p className="text-lg font-bold text-purple-400">${(plan.price / 100).toFixed(2)}</p>
                       <p className="text-[10px] text-muted-foreground">/month</p>
                     </div>
                   </div>
