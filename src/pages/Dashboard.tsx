@@ -3,13 +3,14 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useBalance } from "@/hooks/useBalance";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, Lock, CheckCircle } from "lucide-react";
+import { Lock, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import WithdrawModal from "@/components/WithdrawModal";
 import PackagePopup from "@/components/PackagePopup";
 import LiveWithdrawalBar from "@/components/LiveWithdrawalBar";
+import { formatMoney, formatRewardRange } from "@/lib/currency";
 
 const categoryMap: Record<string, string> = {
   "Code Review": "CODE", "Mathematics": "MATH", "Research & Writing": "WRITING",
@@ -66,21 +67,15 @@ export default function Dashboard() {
   const tasksCompleted = completions?.filter(c => c.status === "approved").length || 0;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
-  // Free plan: 2 surveys allowed
   const FREE_TASK_LIMIT = 2;
   const hasReachedFreeLimit = !isActive && tasksCompleted >= FREE_TASK_LIMIT;
 
-  // Show package popup on mount if no active subscription
   useEffect(() => {
     if (!isActive) {
       const timer = setTimeout(() => setShowPackagePopup(true), 1500);
       return () => clearTimeout(timer);
     }
   }, [isActive]);
-
-  const handleWithdraw = () => {
-    setShowWithdraw(true);
-  };
 
   const handleTaskClick = (taskId: string) => {
     if (hasReachedFreeLimit) {
@@ -104,35 +99,37 @@ export default function Dashboard() {
       </div>
 
       {/* Balance Card */}
-      <div className="mb-3 rounded-xl border border-border bg-card p-4">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">💰</span>
-            <span className="text-xs text-muted-foreground">Available Balance</span>
+      <div className="mb-3 rounded-xl border border-border bg-card p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-sm">💰</span>
+              <span className="text-[10px] text-muted-foreground">Available Balance</span>
+            </div>
+            <p className="text-xl font-bold">{formatMoney(balance)}</p>
           </div>
+          <button
+            onClick={() => setShowWithdraw(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-green-500 px-4 py-2 text-xs font-bold text-white hover:bg-green-600"
+          >
+            💸 Withdraw
+          </button>
         </div>
-        <p className="text-2xl font-bold mb-2">KES {balance.toLocaleString()}.00</p>
-        <button
-          onClick={handleWithdraw}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-2.5 text-sm font-bold text-white hover:bg-green-600"
-        >
-          💸 Withdraw
-        </button>
       </div>
 
       {/* Stats Row */}
       <div className="mb-3 grid grid-cols-3 gap-2">
-        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+        <div className="rounded-xl border border-border bg-card px-2 py-2 text-center">
           <p className="text-[10px] text-muted-foreground">Tasks</p>
-          <p className="text-base font-bold">{tasks?.length || 0}+</p>
+          <p className="text-sm font-bold">400+</p>
         </div>
-        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+        <div className="rounded-xl border border-border bg-card px-2 py-2 text-center">
           <p className="text-[10px] text-muted-foreground">Available</p>
-          <p className="text-base font-bold">24 hrs</p>
+          <p className="text-sm font-bold">24 hrs</p>
         </div>
-        <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center">
+        <div className="rounded-xl border border-border bg-card px-2 py-2 text-center">
           <p className="text-[10px] text-muted-foreground">Active Users</p>
-          <p className="text-base font-bold">1,205</p>
+          <p className="text-sm font-bold">1,205</p>
         </div>
       </div>
 
@@ -161,29 +158,26 @@ export default function Dashboard() {
             const tagColor = categoryColors[tag] || "bg-purple-500/10 text-purple-400 border-purple-500/30";
 
             return (
-              <div key={task.id} className="flex flex-col rounded-2xl border border-border bg-card p-4">
-                <Badge variant="outline" className={`mb-2 w-fit text-[10px] font-semibold ${tagColor}`}>
-                  {tag}
-                </Badge>
-                <h3 className="mb-1 text-sm font-bold leading-tight">{task.title}</h3>
-                <p className="mb-2 text-xs text-muted-foreground line-clamp-2">{task.description}</p>
-                <p className="mb-3 text-xs font-semibold text-green-400">KES {task.reward} per task</p>
+              <div key={task.id} className="flex flex-col rounded-2xl border border-border bg-card p-3">
+                <h3 className="mb-1 text-xs font-bold leading-tight">{task.title}</h3>
+                <p className="mb-1.5 text-[10px] text-muted-foreground line-clamp-2">{task.description}</p>
+                <p className="mb-2 text-[11px] font-semibold text-green-400">{formatRewardRange(task.reward)}</p>
 
                 {isCompleted ? (
-                  <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-2 text-xs font-semibold text-green-400">
+                  <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-1.5 text-[10px] font-semibold text-green-400">
                     <CheckCircle className="h-3 w-3" /> Completed
                   </button>
                 ) : hasReachedFreeLimit ? (
                   <button
                     onClick={() => setShowPackagePopup(true)}
-                    className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-2 text-xs font-semibold text-purple-400"
+                    className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-1.5 text-[10px] font-semibold text-purple-400"
                   >
-                    <Lock className="h-3 w-3" /> Upgrade to Unlock
+                    <Lock className="h-3 w-3" /> Upgrade
                   </button>
                 ) : (
                   <button
                     onClick={() => handleTaskClick(task.id)}
-                    className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500 py-2 text-xs font-bold text-white hover:bg-green-600"
+                    className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500 py-1.5 text-[10px] font-bold text-white hover:bg-green-600"
                   >
                     Start Earning →
                   </button>

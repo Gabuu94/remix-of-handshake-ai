@@ -7,6 +7,7 @@ import { DollarSign, TrendingUp, Calendar, CheckCircle, Wallet } from "lucide-re
 import { useState, useMemo } from "react";
 import WithdrawModal from "@/components/WithdrawModal";
 import PackagePopup from "@/components/PackagePopup";
+import { formatMoney } from "@/lib/currency";
 
 export default function Earnings() {
   const { user } = useAuth();
@@ -53,17 +54,14 @@ export default function Earnings() {
   }, [completions]);
 
   const handleWithdraw = () => {
-    if (!isActive) {
-      setShowPackage(true);
-      return;
-    }
+    if (!isActive) { setShowPackage(true); return; }
     setShowWithdraw(true);
   };
 
   const stats = [
-    { label: "This Week", value: `KES ${thisWeek}`, sub: "Current week", icon: DollarSign },
-    { label: "This Month", value: `KES ${thisMonth}`, sub: "Current month", icon: TrendingUp },
-    { label: "All Time", value: `KES ${totalEarned}`, sub: `${totalTasks} tasks`, icon: Calendar },
+    { label: "This Week", value: formatMoney(thisWeek), sub: "Current week", icon: DollarSign },
+    { label: "This Month", value: formatMoney(thisMonth), sub: "Current month", icon: TrendingUp },
+    { label: "All Time", value: formatMoney(totalEarned), sub: `${totalTasks} tasks`, icon: Calendar },
     { label: "Tasks Done", value: totalTasks, sub: "Total submissions", icon: CheckCircle },
   ];
 
@@ -74,26 +72,21 @@ export default function Earnings() {
         <p className="text-muted-foreground">Track your income and withdraw funds.</p>
       </div>
 
-      {/* Balance + Withdraw */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Wallet className="h-5 w-5 text-green-400" />
             <div>
               <p className="font-semibold">Available Balance</p>
-              <p className="text-2xl font-bold text-green-400">KES {balance.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-green-400">{formatMoney(balance)}</p>
             </div>
           </div>
-          <button
-            onClick={handleWithdraw}
-            className="rounded-xl bg-green-500 px-6 py-2 text-sm font-bold text-white hover:bg-green-600"
-          >
+          <button onClick={handleWithdraw} className="rounded-xl bg-green-500 px-6 py-2 text-sm font-bold text-white hover:bg-green-600">
             💸 Withdraw
           </button>
         </div>
       </div>
 
-      {/* Stats */}
       <div className="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
@@ -107,13 +100,12 @@ export default function Earnings() {
         ))}
       </div>
 
-      {/* Weekly Chart */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-5">
         <h3 className="mb-4 font-semibold">Weekly Earnings</h3>
         <div className="flex items-end justify-between gap-2" style={{ height: 140 }}>
           {chartData.map((d) => (
             <div key={d.name} className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">KES {d.value}</span>
+              <span className="text-[10px] text-muted-foreground">{formatMoney(d.value)}</span>
               <div className="w-full rounded-t-md bg-green-500 transition-all" style={{ height: `${Math.max(d.height, 4)}%`, minHeight: 4 }} />
               <span className="text-[10px] text-muted-foreground">{d.name}</span>
             </div>
@@ -121,7 +113,6 @@ export default function Earnings() {
         </div>
       </div>
 
-      {/* Transactions */}
       <div className="rounded-2xl border border-border bg-card">
         <div className="border-b border-border p-4">
           <h3 className="font-semibold">Transaction History</h3>
@@ -139,7 +130,7 @@ export default function Earnings() {
                   <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-green-400">KES {c.earned_amount || 0}</p>
+                  <p className="font-semibold text-green-400">{formatMoney(c.earned_amount || 0)}</p>
                   <p className={`text-xs capitalize ${c.status === "approved" ? "text-green-400" : c.status === "rejected" ? "text-red-400" : "text-yellow-400"}`}>
                     {c.status}
                   </p>

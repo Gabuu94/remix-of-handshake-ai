@@ -23,7 +23,6 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error("Invalid authentication");
 
-    // Check if bonus already claimed
     const { data: profile } = await supabase
       .from("profiles")
       .select("balance, welcome_bonus_claimed")
@@ -37,8 +36,8 @@ serve(async (req) => {
       );
     }
 
-    // Credit KES 600 bonus
-    const newBalance = (profile?.balance || 0) + 600;
+    // $10 signup bonus = 1000 cents
+    const newBalance = (profile?.balance || 0) + 1000;
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ balance: newBalance, welcome_bonus_claimed: true })
