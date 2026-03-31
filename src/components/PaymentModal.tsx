@@ -22,6 +22,8 @@ export default function PaymentModal({ plan, onClose }: Props) {
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "pending" | "success" | "failed">("idle");
   const [checkoutId, setCheckoutId] = useState("");
 
+  const priceDisplay = `$${(plan.price / 100).toFixed(2)}`;
+
   const handlePay = async () => {
     if (!phone.trim()) {
       toast.error("Please enter your M-Pesa phone number");
@@ -50,7 +52,6 @@ export default function PaymentModal({ plan, onClose }: Props) {
     }
   };
 
-  // Poll for payment status
   useEffect(() => {
     if (!checkoutId) return;
     const interval = setInterval(async () => {
@@ -70,9 +71,7 @@ export default function PaymentModal({ plan, onClose }: Props) {
           clearInterval(interval);
           toast.error("Payment failed or was cancelled.");
         }
-      } catch (err) {
-        // Continue polling
-      }
+      } catch (err) {}
     }, 5000);
 
     const timeout = setTimeout(() => {
@@ -84,10 +83,7 @@ export default function PaymentModal({ plan, onClose }: Props) {
       }
     }, 120000);
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [checkoutId]);
 
   return (
@@ -127,7 +123,7 @@ export default function PaymentModal({ plan, onClose }: Props) {
             </p>
             <div className="mt-4 rounded-xl border border-green-500/30 bg-green-500/5 p-4">
               <p className="text-sm font-medium text-green-400">Enter your M-Pesa PIN to complete payment</p>
-              <p className="mt-1 text-xs text-muted-foreground">Amount: KES {plan.price}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Amount: {priceDisplay}</p>
             </div>
             <div className="mt-4 flex items-center justify-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-green-400" />
@@ -143,25 +139,18 @@ export default function PaymentModal({ plan, onClose }: Props) {
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Amount</span>
-                <span className="text-lg font-bold text-green-400">KES {plan.price}</span>
+                <span className="text-lg font-bold text-green-400">{priceDisplay}</span>
               </div>
             </div>
 
             <div>
               <Label htmlFor="phone">M-Pesa Phone Number</Label>
-              <Input
-                id="phone"
-                placeholder="0712345678"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1"
-                disabled={loading}
-              />
+              <Input id="phone" placeholder="0712345678" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" disabled={loading} />
               <p className="mt-1 text-xs text-muted-foreground">Enter the phone number registered with M-Pesa</p>
             </div>
 
             <Button className="w-full bg-green-500 hover:bg-green-600 text-white" onClick={handlePay} disabled={loading}>
-              Pay KES {plan.price} via M-Pesa 📲
+              Pay {priceDisplay} via M-Pesa 📲
             </Button>
           </div>
         )}
