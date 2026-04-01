@@ -61,7 +61,7 @@ serve(async (req) => {
       body: JSON.stringify({
         amount,
         phone_number,
-        channel_id: "CH_F02EB871",
+        channel_id: "CH_E5801D51",
         callback_url: callbackUrl,
         api_ref: JSON.stringify({
           user_id: user.id,
