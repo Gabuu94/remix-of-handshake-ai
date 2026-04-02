@@ -98,7 +98,7 @@ export default function Assessment() {
       const { data, error } = await supabase.functions.invoke("claim-bonus");
       if (error) throw error;
       if (data?.success) {
-        toast.success("KES 600 bonus credited to your account!");
+        toast.success("$10.00 bonus credited to your account!");
         queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
         queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
