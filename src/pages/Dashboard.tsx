@@ -67,8 +67,7 @@ export default function Dashboard() {
   const tasksCompleted = completions?.filter(c => c.status === "approved").length || 0;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
-  const FREE_TASK_LIMIT = 2;
-  const hasReachedFreeLimit = !isActive && tasksCompleted >= FREE_TASK_LIMIT;
+  const mustUpgrade = !isActive;
 
   useEffect(() => {
     if (!isActive) {
