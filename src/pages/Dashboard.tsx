@@ -135,11 +135,11 @@ export default function Dashboard() {
       {/* Live Withdrawals Bar */}
       <LiveWithdrawalBar />
 
-      {/* Free plan notice */}
+      {/* Upgrade notice */}
       {!isActive && (
-        <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-1.5">
+        <div className="mb-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-3 py-1.5 cursor-pointer" onClick={() => setShowPackagePopup(true)}>
           <p className="text-[11px] text-yellow-400">
-            ⚡ Free: {FREE_TASK_LIMIT - tasksCompleted > 0 ? `${FREE_TASK_LIMIT - tasksCompleted} surveys left` : "Limit reached — upgrade"}
+            ⚡ Upgrade your account to start earning — <strong>tap here</strong>
           </p>
         </div>
       )}
