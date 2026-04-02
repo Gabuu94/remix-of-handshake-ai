@@ -240,7 +240,7 @@ export default function Assessment() {
 
         <div className="mt-4 rounded-xl border border-border bg-secondary/50 p-6 text-center">
           <p className="text-sm text-muted-foreground">You've earned</p>
-          <p className="text-5xl font-bold text-green-400">KES 600</p>
+          <p className="text-5xl font-bold text-green-400">$10.00</p>
         </div>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">Will be credited to your available balance</p>
