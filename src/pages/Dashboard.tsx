@@ -166,7 +166,7 @@ export default function Dashboard() {
                   <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-1.5 text-[10px] font-semibold text-green-400">
                     <CheckCircle className="h-3 w-3" /> Completed
                   </button>
-                ) : hasReachedFreeLimit ? (
+                ) : mustUpgrade ? (
                   <button
                     onClick={() => setShowPackagePopup(true)}
                     className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-1.5 text-[10px] font-semibold text-purple-400"
