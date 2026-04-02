@@ -77,7 +77,7 @@ export default function Dashboard() {
   }, [isActive]);
 
   const handleTaskClick = (taskId: string) => {
-    if (hasReachedFreeLimit) {
+    if (mustUpgrade) {
       setShowPackagePopup(true);
       return;
     }
