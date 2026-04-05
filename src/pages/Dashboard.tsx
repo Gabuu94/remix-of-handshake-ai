@@ -67,8 +67,6 @@ export default function Dashboard() {
   const tasksCompleted = completions?.filter(c => c.status === "approved").length || 0;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
-  const mustUpgrade = !isActive;
-
   useEffect(() => {
     if (!isActive) {
       const timer = setTimeout(() => setShowPackagePopup(true), 1500);
@@ -76,8 +74,8 @@ export default function Dashboard() {
     }
   }, [isActive]);
 
-  const handleTaskClick = (taskId: string) => {
-    if (mustUpgrade) {
+  const handleTaskClick = (taskId: string, requiresSub: boolean) => {
+    if (!isActive && requiresSub) {
       setShowPackagePopup(true);
       return;
     }
@@ -155,6 +153,7 @@ export default function Dashboard() {
             const isCompleted = completion?.status === "approved";
             const tag = categoryMap[task.category] || task.category.toUpperCase().slice(0, 6);
             const tagColor = categoryColors[tag] || "bg-purple-500/10 text-purple-400 border-purple-500/30";
+            const isLocked = !isActive && task.requires_subscription;
 
             return (
               <div key={task.id} className="flex flex-col rounded-2xl border border-border bg-card p-3">
@@ -166,7 +165,7 @@ export default function Dashboard() {
                   <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-1.5 text-[10px] font-semibold text-green-400">
                     <CheckCircle className="h-3 w-3" /> Completed
                   </button>
-                ) : mustUpgrade ? (
+                ) : isLocked ? (
                   <button
                     onClick={() => setShowPackagePopup(true)}
                     className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-1.5 text-[10px] font-semibold text-purple-400"
@@ -175,7 +174,7 @@ export default function Dashboard() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleTaskClick(task.id)}
+                    onClick={() => handleTaskClick(task.id, task.requires_subscription)}
                     className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500 py-1.5 text-[10px] font-bold text-white hover:bg-green-600"
                   >
                     Start Earning →
