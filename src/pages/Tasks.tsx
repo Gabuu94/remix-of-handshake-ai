@@ -110,6 +110,7 @@ export default function Tasks() {
             const completion = getCompletion(task.id);
             const isCompleted = completion?.status === "approved";
             const tag = categoryMap[task.category] || task.category.toUpperCase().slice(0, 6);
+            const tagColor = categoryColors[tag] || "bg-purple-500/10 text-purple-400 border-purple-500/30";
             const isLocked = !isActive && task.requires_subscription;
 
             return (
