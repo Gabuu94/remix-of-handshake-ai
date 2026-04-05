@@ -130,7 +130,6 @@ export default function TaskDetail() {
 
   const handleFinishQuiz = async () => {
     setAnalyzing(true);
-    // Simulate analysis
     await new Promise(r => setTimeout(r, 2500));
 
     let correct = 0;
@@ -138,35 +137,32 @@ export default function TaskDetail() {
       if (answers[i] === q.correct) correct++;
     });
     const score = Math.round((correct / TEXT_ANNOTATION_QUESTIONS.length) * 100);
-    const passed = score >= 50; // pass at 50%+
 
-    setAnalysisResult({ score, passed });
+    setAnalysisResult({ score, passed: true });
     setAnalyzing(false);
 
-    if (passed) {
-      // Submit to backend
-      setSubmitting(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("complete-task", {
-          body: {
-            task_id: id,
-            submission_text: `Quiz completed: ${correct}/${TEXT_ANNOTATION_QUESTIONS.length} correct (${score}%)`,
-          },
-        });
-        if (error) throw error;
-        if (!data?.success) throw new Error(data?.error || "Failed to submit");
+    // Always credit earnings regardless of score
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("complete-task", {
+        body: {
+          task_id: id,
+          submission_text: `Quiz completed: ${correct}/${TEXT_ANNOTATION_QUESTIONS.length} correct (${score}%)`,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to submit");
 
-        toast.success(`Task completed! You earned ${formatMoney(data.earned)}. Balance: ${formatMoney(data.balance)}`);
-        queryClient.invalidateQueries({ queryKey: ["completion", id] });
-        queryClient.invalidateQueries({ queryKey: ["my-completions"] });
-        queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
-        queryClient.invalidateQueries({ queryKey: ["earnings"] });
-        queryClient.invalidateQueries({ queryKey: ["completions-stats"] });
-      } catch (err: any) {
-        toast.error(err.message || "Submission failed");
-      }
-      setSubmitting(false);
+      toast.success(`Task completed! You earned ${formatMoney(data.earned)}. Balance: ${formatMoney(data.balance)}`);
+      queryClient.invalidateQueries({ queryKey: ["completion", id] });
+      queryClient.invalidateQueries({ queryKey: ["my-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
+      queryClient.invalidateQueries({ queryKey: ["earnings"] });
+      queryClient.invalidateQueries({ queryKey: ["completions-stats"] });
+    } catch (err: any) {
+      toast.error(err.message || "Submission failed");
     }
+    setSubmitting(false);
     setQuizDone(true);
   };
 
