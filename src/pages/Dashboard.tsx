@@ -67,8 +67,6 @@ export default function Dashboard() {
   const tasksCompleted = completions?.filter(c => c.status === "approved").length || 0;
   const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "User";
 
-  const mustUpgrade = !isActive;
-
   useEffect(() => {
     if (!isActive) {
       const timer = setTimeout(() => setShowPackagePopup(true), 1500);
@@ -76,8 +74,8 @@ export default function Dashboard() {
     }
   }, [isActive]);
 
-  const handleTaskClick = (taskId: string) => {
-    if (mustUpgrade) {
+  const handleTaskClick = (taskId: string, requiresSub: boolean) => {
+    if (!isActive && requiresSub) {
       setShowPackagePopup(true);
       return;
     }
