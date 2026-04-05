@@ -239,21 +239,10 @@ export default function TaskDetail() {
             </div>
           ) : quizDone && analysisResult ? (
             <div className="text-center py-6">
-              {analysisResult.passed ? (
-                <>
-                  <CheckCircle className="mx-auto mb-3 h-12 w-12 text-green-400" />
-                  <h3 className="text-xl font-bold text-green-400 mb-2">Survey Passed!</h3>
-                  <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
-                  <p className="text-sm text-muted-foreground">Your earnings have been credited to your balance.</p>
-                </>
-              ) : (
-                <>
-                  <Lock className="mx-auto mb-3 h-12 w-12 text-red-400" />
-                  <h3 className="text-xl font-bold text-red-400 mb-2">Score Too Low</h3>
-                  <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
-                  <p className="text-sm text-muted-foreground">You need at least 50% to pass. This free survey can only be attempted once.</p>
-                </>
-              )}
+              <CheckCircle className="mx-auto mb-3 h-12 w-12 text-green-400" />
+              <h3 className="text-xl font-bold text-green-400 mb-2">Survey Completed!</h3>
+              <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
+              <p className="text-sm text-muted-foreground">Your earnings have been credited to your balance.</p>
             </div>
           ) : (
             <div>
