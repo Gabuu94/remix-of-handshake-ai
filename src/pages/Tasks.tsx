@@ -59,14 +59,8 @@ export default function Tasks() {
   });
 
   const getCompletion = (taskId: string) => completions?.find(c => c.task_id === taskId);
-  const completedCount = completions?.filter(c => c.status === "approved").length || 0;
-
-  // Free accounts: 2 tasks allowed
-  const freeTaskLimit = 2;
-  const hasReachedFreeLimit = !isActive && completedCount >= freeTaskLimit;
-
-  const handleTaskClick = (taskId: string) => {
-    if (hasReachedFreeLimit) {
+  const handleTaskClick = (taskId: string, requiresSub: boolean) => {
+    if (!isActive && requiresSub) {
       setShowPackage(true);
       return;
     }
