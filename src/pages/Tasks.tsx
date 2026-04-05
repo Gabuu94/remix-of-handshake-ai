@@ -75,7 +75,7 @@ export default function Tasks() {
         {!isActive && (
           <div className="mt-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-2">
             <p className="text-xs text-yellow-400">
-              ⚡ Free account: {freeTaskLimit - completedCount > 0 ? `${freeTaskLimit - completedCount} task remaining` : "Limit reached — upgrade to continue"}
+              ⚡ Free account: Only the Text Annotation survey is free — upgrade to unlock all tasks
             </p>
           </div>
         )}
