@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import PackagePopup from "@/components/PackagePopup";
+import { formatMoney } from "@/lib/currency";
 
 const categoryFilters = ["All", "CODE", "MATH", "WRITING", "RESEARCH", "EVAL", "SAFETY", "LANG", "DATA"];
 
