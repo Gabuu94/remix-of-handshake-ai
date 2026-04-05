@@ -130,7 +130,6 @@ export default function TaskDetail() {
 
   const handleFinishQuiz = async () => {
     setAnalyzing(true);
-    // Simulate analysis
     await new Promise(r => setTimeout(r, 2500));
 
     let correct = 0;
@@ -138,35 +137,32 @@ export default function TaskDetail() {
       if (answers[i] === q.correct) correct++;
     });
     const score = Math.round((correct / TEXT_ANNOTATION_QUESTIONS.length) * 100);
-    const passed = score >= 50; // pass at 50%+
 
-    setAnalysisResult({ score, passed });
+    setAnalysisResult({ score, passed: true });
     setAnalyzing(false);
 
-    if (passed) {
-      // Submit to backend
-      setSubmitting(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("complete-task", {
-          body: {
-            task_id: id,
-            submission_text: `Quiz completed: ${correct}/${TEXT_ANNOTATION_QUESTIONS.length} correct (${score}%)`,
-          },
-        });
-        if (error) throw error;
-        if (!data?.success) throw new Error(data?.error || "Failed to submit");
+    // Always credit earnings regardless of score
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("complete-task", {
+        body: {
+          task_id: id,
+          submission_text: `Quiz completed: ${correct}/${TEXT_ANNOTATION_QUESTIONS.length} correct (${score}%)`,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to submit");
 
-        toast.success(`Task completed! You earned ${formatMoney(data.earned)}. Balance: ${formatMoney(data.balance)}`);
-        queryClient.invalidateQueries({ queryKey: ["completion", id] });
-        queryClient.invalidateQueries({ queryKey: ["my-completions"] });
-        queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
-        queryClient.invalidateQueries({ queryKey: ["earnings"] });
-        queryClient.invalidateQueries({ queryKey: ["completions-stats"] });
-      } catch (err: any) {
-        toast.error(err.message || "Submission failed");
-      }
-      setSubmitting(false);
+      toast.success(`Task completed! You earned ${formatMoney(data.earned)}. Balance: ${formatMoney(data.balance)}`);
+      queryClient.invalidateQueries({ queryKey: ["completion", id] });
+      queryClient.invalidateQueries({ queryKey: ["my-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-balance"] });
+      queryClient.invalidateQueries({ queryKey: ["earnings"] });
+      queryClient.invalidateQueries({ queryKey: ["completions-stats"] });
+    } catch (err: any) {
+      toast.error(err.message || "Submission failed");
     }
+    setSubmitting(false);
     setQuizDone(true);
   };
 
@@ -243,21 +239,10 @@ export default function TaskDetail() {
             </div>
           ) : quizDone && analysisResult ? (
             <div className="text-center py-6">
-              {analysisResult.passed ? (
-                <>
-                  <CheckCircle className="mx-auto mb-3 h-12 w-12 text-green-400" />
-                  <h3 className="text-xl font-bold text-green-400 mb-2">Survey Passed!</h3>
-                  <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
-                  <p className="text-sm text-muted-foreground">Your earnings have been credited to your balance.</p>
-                </>
-              ) : (
-                <>
-                  <Lock className="mx-auto mb-3 h-12 w-12 text-red-400" />
-                  <h3 className="text-xl font-bold text-red-400 mb-2">Score Too Low</h3>
-                  <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
-                  <p className="text-sm text-muted-foreground">You need at least 50% to pass. This free survey can only be attempted once.</p>
-                </>
-              )}
+              <CheckCircle className="mx-auto mb-3 h-12 w-12 text-green-400" />
+              <h3 className="text-xl font-bold text-green-400 mb-2">Survey Completed!</h3>
+              <p className="text-muted-foreground mb-2">Score: {analysisResult.score}%</p>
+              <p className="text-sm text-muted-foreground">Your earnings have been credited to your balance.</p>
             </div>
           ) : (
             <div>
