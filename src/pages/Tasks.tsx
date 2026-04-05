@@ -109,7 +109,7 @@ export default function Tasks() {
             const completion = getCompletion(task.id);
             const isCompleted = completion?.status === "approved";
             const tag = categoryMap[task.category] || task.category.toUpperCase().slice(0, 6);
-            const tagColor = categoryColors[tag] || "bg-purple-500/10 text-purple-400 border-purple-500/30";
+            const isLocked = !isActive && task.requires_subscription;
 
             return (
               <div key={task.id} className="flex flex-col rounded-2xl border border-border bg-card p-4">
@@ -118,13 +118,13 @@ export default function Tasks() {
                 </Badge>
                 <h3 className="mb-1 text-sm font-bold leading-tight">{task.title}</h3>
                 <p className="mb-2 text-xs text-muted-foreground line-clamp-2">{task.description}</p>
-                <p className="mb-3 text-xs font-semibold text-green-400">KES {task.reward} per task</p>
+                <p className="mb-3 text-xs font-semibold text-green-400">{formatMoney(task.reward)} per task</p>
 
                 {isCompleted ? (
                   <button className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500/10 py-2 text-xs font-semibold text-green-400">
                     <CheckCircle className="h-3 w-3" /> Completed
                   </button>
-                ) : hasReachedFreeLimit ? (
+                ) : isLocked ? (
                   <button
                     onClick={() => setShowPackage(true)}
                     className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-purple-500/10 py-2 text-xs font-semibold text-purple-400"
@@ -133,7 +133,7 @@ export default function Tasks() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleTaskClick(task.id)}
+                    onClick={() => handleTaskClick(task.id, task.requires_subscription)}
                     className="mt-auto flex w-full items-center justify-center gap-1 rounded-xl bg-green-500 py-2 text-xs font-bold text-white hover:bg-green-600"
                   >
                     Start Earning →
