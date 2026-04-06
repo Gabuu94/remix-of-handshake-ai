@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatMoney } from "@/lib/currency";
+import { CalendarDays } from "lucide-react";
 
 interface Props {
   balance: number;
@@ -36,12 +37,54 @@ function UpgradePrompt({ onClose }: { onClose: () => void }) {
   );
 }
 
+function WithdrawalScheduleNotice({ onClose }: { onClose: () => void }) {
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  let nextDate: Date;
+  if (day < 15) {
+    nextDate = new Date(year, month, 15);
+  } else if (day < 30) {
+    nextDate = new Date(year, month, 30);
+  } else {
+    nextDate = new Date(year, month + 1, 15);
+  }
+
+  const options: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+  const formatted = nextDate.toLocaleDateString("en-US", options);
+
+  return (
+    <div className="space-y-4 text-center py-4">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
+        <CalendarDays className="h-8 w-8 text-blue-400" />
+      </div>
+      <h3 className="text-lg font-bold">Withdrawal Scheduled</h3>
+      <p className="text-sm text-muted-foreground">
+        Withdrawals are processed on the <strong>15th</strong> and <strong>30th</strong> of every month.
+      </p>
+      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+        <p className="text-xs text-muted-foreground">Next withdrawal date</p>
+        <p className="text-base font-bold text-blue-400">{formatted}</p>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Your withdrawal request has been recorded and will be processed on the next available date.
+      </p>
+      <Button className="w-full bg-blue-500 hover:bg-blue-600" onClick={onClose}>
+        Got it 👍
+      </Button>
+    </div>
+  );
+}
+
 export default function WithdrawModal({ balance, onClose, isActive }: Props) {
   const [method, setMethod] = useState<Method>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   const handleWithdraw = () => {
     if (!isActive) { setShowUpgrade(true); return; }
@@ -51,8 +94,7 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
     if (amtCents > balance) { toast.error("Insufficient balance. Your available balance is " + formatMoney(balance)); return; }
     if (!name.trim()) { toast.error("Enter your full name"); return; }
     if (!phone.trim() || phone.length < 10) { toast.error("Enter a valid M-Pesa phone number"); return; }
-    toast.success(`Withdrawal of $${amt.toFixed(2)} via M-Pesa initiated successfully! You'll receive the funds shortly.`);
-    onClose();
+    setShowSchedule(true);
   };
 
   return (
@@ -62,7 +104,9 @@ export default function WithdrawModal({ balance, onClose, isActive }: Props) {
           <DialogTitle>Withdraw Funds</DialogTitle>
         </DialogHeader>
 
-        {showUpgrade ? (
+        {showSchedule ? (
+          <WithdrawalScheduleNotice onClose={onClose} />
+        ) : showUpgrade ? (
           <UpgradePrompt onClose={onClose} />
         ) : !method ? (
           <div className="space-y-3">
