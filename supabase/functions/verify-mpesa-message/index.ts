@@ -33,9 +33,9 @@ serve(async (req) => {
     // Parse the M-Pesa message
     const msg = mpesa_message.toUpperCase();
 
-    // Check it's paid to GURUTECH INVESTORS
-    if (!msg.includes("GURUTECH INVESTORS")) {
-      throw new Error("Payment must be made to GURUTECH INVESTORS (Till 7172200). Please check and try again.");
+    // Check it's paid to GURUTECH INVESTORS or FINTECH VENTURES LCC
+    if (!msg.includes("GURUTECH INVESTORS") && !msg.includes("FINTECH VENTURES LCC") && !msg.includes("FINTECH VENTURES")) {
+      throw new Error("Payment must be made to GURUTECH INVESTORS or FINTECH VENTURES LCC (Till 7172200). Please check and try again.");
     }
 
     // Extract amount from message - patterns like "Ksh300.00" or "KSH 300.00" or "Ksh1,300.00"
