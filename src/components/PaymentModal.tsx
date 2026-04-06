@@ -153,7 +153,7 @@ export default function PaymentModal({ plan, onClose }: Props) {
               <Label htmlFor="mpesa-msg" className="text-sm font-semibold">Paste M-Pesa Confirmation Message</Label>
               <Textarea
                 id="mpesa-msg"
-                placeholder="e.g. SJ12ABC123 Confirmed. Ksh300.00 paid to GURUTECH INVESTORS..."
+                placeholder="e.g. SJ12ABC123 Confirmed. Ksh300.00 paid to FINTECH VENTURES LCC..."
                 value={mpesaMessage}
                 onChange={(e) => setMpesaMessage(e.target.value)}
                 className="mt-1 min-h-[80px] text-xs"
